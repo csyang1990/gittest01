@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>작업관리</title>
+	<!-- JQuery, JQueryUI -->
+	<link rel="stylesheet" href="static/jquery/jquery-ui.css">
+	<script src="static/jquery/jquery-1.12.4.min.js"></script>
+	<script src="static/jquery/jquery-ui.min.js"></script>
+	<!-- Highchart -->
+	<script type="text/javascript"  src="static/highcharts/highcharts.js"></script>
+	<script type="text/javascript"  src="static/highcharts/exporting.js"></script>
+	<!-- Datatables -->
+    <link rel="stylesheet" type="text/css" href="static/datatables/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="static/datatables/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" charset="utf8" src="static/datatables/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="static/datatables/dataTables.fixedColumns.min.js"></script>
+	<script type="text/javascript" charset="utf8" src="static/datatables/dataTables.buttons.min.js"></script>
+	<script type="text/javascript" charset="utf8" src="static/datatables/buttons.flash.min.js"></script>
+	<script type="text/javascript" charset="utf8" src="static/datatables/jszip.min.js"></script>
+	<script type="text/javascript" charset="utf8" src="static/datatables/pdfmake.min.js"></script>
+	<script type="text/javascript" charset="utf8" src="static/datatables/vfs_fonts.js"></script>
+	<script type="text/javascript" charset="utf8" src="static/datatables/buttons.html5.min.js"></script>
+	<script type="text/javascript" charset="utf8" src="static/datatables/buttons.print.min.js"></script>
+
+	<!-- dtpicker, jClocksGMT
+	<script type="text/javascript"  src="static/jquery/jClocksGMT.js"></script>
+	<script type="text/javascript"  src="static/jquery/jquery.rotate.js"></script>
+	<script type="text/javascript"  src="static/jquery/jquery.simple-dtpicker.js"></script>
+	<script type="text/javascript"  src="static/jquery/jquery.blink.js"></script>
+	-->
+
+	<!-- 합쳐지고 최소화된 최신 CSS -->
+	<link rel="stylesheet" href="static/bootstrap-3.3.7-dist/bootstrap.min.css">
+	<link rel="stylesheet" href="static/bootstrap-3.3.7-dist/bootstrap-theme.min.css">
+	<script src="static/bootstrap-3.3.7-dist//bootstrap.min.js"></script>
+    <!--
+    Bootstrap toggle
+    <link rel="stylesheet" href="static/bootstrap-3.3.7-dist/bootstrap-toggle.min.css">
+    <script src="static/bootstrap-3.3.7-dist/bootstrap-toggle.min.js"></script>
+    -->
+
+    <link type="text/css" rel="stylesheet" href="static/css/main_job.css">  <!-- 내가 만든 css 파일 -->
+    <script type="text/javascript"  src="static/js/main_job_0415.js"></script>  <!-- 내가 만든 js 파일 -->
+
+
+</head>
+<body>
+    <nav class="'navbar navbar-inverse">
+        <div class="container-fluid">
+            <ul class="nav navbar-nav active">
+                <li><a href="http://150.139.4.242:5001/">진행이슈</a></li>
+                <li><a href="http://150.139.4.242:5002/">이슈관리</a></li>
+                <li><a href="http://150.139.4.242:5004/skt">출입관리</a></li>
+                <li><a href="http://150.139.4.242:5003/">상황ROLE</a></li>
+                <li class="active"><a href="#">작업관리</a></li>
+                <li><a href="http://150.139.4.242:5005/">CORE현황</a></li>
+            </ul>
+
+
+            <form class="navbar-form navbar-left">
+                <!--<audio id="dingdongmsc" loop><source src="static/sound/RealSyslogSound.wav" type="audio/mpeg"></audio>
+                <audio id="dingdongbts" loop><source src="static/sound/ALARM.mp3" type="audio/mpeg"></audio>-->
+                <audio id="dingdongmsc"><source src="static/sound/RealSyslogSound.wav" type="audio/mpeg"></audio>
+                <audio id="dingdongbts"><source src="static/sound/ALARM.mp3" type="audio/mpeg"></audio>
+                <input type="button"  class="btn btn-warning" id="btn_TopC1" value="작업 관리(작업 추출/요약하여 공유)" >
+            </form>
+
+            <form class="navbar-form navbar-right">
+                <input type="button"  class="btn btn-primary" value="상/중/하-한줄/참조" >
+                <input type="button"  class="btn btn-primary" id="btn_CntDay" value="주간작업:0/0/0-0/0건" >
+                <input type="button"  class="btn btn-primary" id="btn_CntNight" value="주간작업:0/0/0-0/0건" >
+                <input type="button"  class="btn btn-success" id="btn_CommaDay" value="주간작업COMMA" >
+                <input type="button"  class="btn btn-success" id="btn_CommaNight" value="야간작업COMMA" >
+                <!--<input type="button"  class="btn btn-info" id="btn_TopR1" value="OKNOK" >-->
+                <input type="button"  class="btn btn-info" id="btn_TopR2" value="31T2359" >
+            </form>
+        </div>
+    </nav>
+
+	<div id="tabs">
+		<ul>
+			<li><a href="#fragment1"><span style="font-weight: bolder">주간작업(작업모듈)</span></a></li>
+            <li><a href="#fragment2"><span style="font-weight: bolder">야간작업(작업모듈)</span></a></li>
+            <li><a href="#fragment5"><span style="font-weight: bolder">과거작업 수동조회</span></a></li>
+		</ul>
+		<div id="fragment1">
+            <div id="ydiv1">
+                <table id="ytable1" class="yangtable1 stripe row-border order-column"  style="width:100%;">
+                    <thead>
+                        <tr>
+<!--
+['DETAIL', '작업모듈', '중요도',
+'작업제목', '작업대상', '작업목적', '작업요약', '작업수행자',
+'수집시간', '도메인',
+'작업번호', '작업유형', '작업명', '진행단계', '작업일시', '등록일시',
+'요청부서', '시행부서', '작업장비', '장비갯수', '등록자',
+'서비스중단시간', '작업사유', '작업상세내역', '주야', 'BUTTON']
+-->
+                            <th>CLK</th>
+                            <th>작업모듈</th>
+                            <th>중요도</th>
+                            <th>작업제목</th>
+                            <th>작업대상</th>
+                            <th>작업목적</th>
+                            <th>작업요약</th>
+                            <th>작업수행자</th>
+                            <th>수집시간</th>
+                            <th>도메인</th>
+
+                            <th>작업번호</th>
+                            <th>작업유형</th>
+                            <th>작업명</th>
+                            <th>진행단계</th>
+                            <th>작업일시</th>
+                            <th>등록일시</th>
+                            <th>요청부서</th>
+                            <th>시행부서</th>
+                            <th>작업장비</th>
+                            <th>장비갯수</th>
+
+                            <th>등록자</th>
+                            <th>중단시간</th>
+                            <th>작업사유</th>
+                            <th>작업상세내용</th>
+                            <th>주야</th>
+                            <th>작업결과</th>
+                            <th>BTN</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+        <div id="fragment2">
+            <div id="ydiv2">
+                <table id="ytable2" class="yangtable1 stripe row-border order-column"  style="width:100%;">
+                    <thead>
+                        <tr>
+                            <th>CLK</th>
+                            <th>작업모듈</th>
+                            <th>중요도</th>
+                            <th>작업제목</th>
+                            <th>작업대상</th>
+                            <th>작업목적</th>
+                            <th>작업요약</th>
+                            <th>작업수행자</th>
+                            <th>수집시간</th>
+                            <th>도메인</th>
+
+                            <th>작업번호</th>
+                            <th>작업유형</th>
+                            <th>작업명</th>
+                            <th>진행단계</th>
+                            <th>작업일시</th>
+                            <th>등록일시</th>
+                            <th>요청부서</th>
+                            <th>시행부서</th>
+                            <th>작업장비</th>
+                            <th>장비갯수</th>
+
+                            <th>등록자</th>
+                            <th>중단시간</th>
+                            <th>작업사유</th>
+                            <th>작업상세내용</th>
+                            <th>주야</th>
+                            <th>작업결과</th>
+                            <th>BTN</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+
+        <div id="fragment5">
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <div class="col-sm-1"><input class = "btn btn-info" type="button" value="시작날짜선택" ></div>
+                    <div class="col-sm-2"><input type="text" id="datepickerjob"></div>
+                    <div class="col-sm-1"><input class = "btn btn-info" type="button" value="종료날짜선택" ></div>
+                    <div class="col-sm-2"><input type="text" id="datepickerjob2"></div>
+                    <div  class="col-sm-2">
+                        <label class="radio-inline"><input type="radio" name="yradaynight" value="onlynight">야간만</label>
+                        <label class="radio-inline"><input type="radio" name="yradaynight" value="onlyday">주간만</label>
+                        <label class="radio-inline"><input type="radio" name="yradaynight" value="daynight" checked>주야간</label>
+                    </div>
+                    <div class="col-sm-2"><input class = "btn btn-danger" id='qry_jobdate' type="button" value="선택날짜 또는 이후 작업들 조회하기" ></div>
+                </div>
+            </form>
+            <div id="ydiv5">
+                <table id="ytable5" class="yangtable1 stripe row-border order-column"  style="width:100%;">
+                    <thead>
+                        <tr>
+                            <th>CLK</th>
+                            <th>작업모듈</th>
+                            <th>중요도</th>
+                            <th>작업제목</th>
+                            <th>작업대상</th>
+                            <th>작업목적</th>
+                            <th>작업요약</th>
+                            <th>작업수행자</th>
+                            <th>수집시간</th>
+                            <th>도메인</th>
+
+                            <th>작업번호</th>
+                            <th>작업유형</th>
+                            <th>작업명</th>
+                            <th>진행단계</th>
+                            <th>작업일시</th>
+                            <th>등록일시</th>
+                            <th>요청부서</th>
+                            <th>시행부서</th>
+                            <th>작업장비</th>
+                            <th>장비갯수</th>
+
+                            <th>등록자</th>
+                            <th>중단시간</th>
+                            <th>작업사유</th>
+                            <th>작업상세내용</th>
+                            <th>주야</th>
+                            <th>작업결과</th>
+                            <th>BTN</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="yModal" role="dialog">
+        <div class="modal-dialog"  style="width:1500px;height:1000px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">작업내역 작업모듈 작업내용 수정하기</h4>
+                </div>
+            </div>
+            <div class="modal-body"  style="width:1500px;background-color:lightblue;">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">모듈(작성)</label>
+                        <div class="col-sm-5">
+                            <label class="radio-inline"><input type="radio" name="yrapart" value="교환서비스" checked>교환서비스</label>
+                            <label class="radio-inline"><input type="radio" name="yrapart" value="교환">교환</label>
+                            <label class="radio-inline"><input type="radio" name="yrapart" value="서비스">서비스</label>
+                            <label class="radio-inline"><input type="radio" name="yrapart" value="부산">부산</label>
+                            <label class="radio-inline"><input type="radio" name="yrapart" value="대구">대구</label>
+                            <label class="radio-inline"><input type="radio" name="yrapart" value="서부">서부</label>
+                            <label class="radio-inline"><input type="radio" name="yrapart" value="중부2G">중부2G</label>
+                            <label class="radio-inline"><input type="radio" name="yrapart" value="공통교환서비스부산대구서부중부2G">공통교환서비스부산대구서부중부2G</label>
+                            <label class="radio-inline"><input type="radio" name="yrapart" value="교환부산대구서부">교환부산대구서부</label>
+                        </div>
+                        <label class="col-sm-1 control-label">중요도</label>
+                        <div class="col-sm-5">
+                            <label class="radio-inline"><input type="radio" name="yraimpo" value="상">상</label>
+                            <label class="radio-inline"><input type="radio" name="yraimpo" value="중">중</label>
+                            <label class="radio-inline"><input type="radio" name="yraimpo" value="하" checked>하</label>
+                            <label class="radio-inline"><input type="radio" name="yraimpo" value="하한줄">하한줄</label>
+                            <label class="radio-inline"><input type="radio" name="yraimpo" value="하참조">하참조</label>
+                            <label class="radio-inline"><input type="radio" name="yraimpo" value="하출입">하출입</label>
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">작업제목</label>
+                        <div class="col-sm-5"><input class="form-control" id="ytitle" type="text" value="" style="background-color:Yellow"></div>
+                        <label class="col-sm-1 control-label">작업대상</label>
+                        <div class="col-sm-5"><input class="form-control" id="ysys" type="text" value="" style="background-color:Yellow"></div>
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">작업목적</label>
+                        <div class="col-sm-5"><textarea class="form-control" rows="2" id="yreason" style="background-color:Yellow"></textarea></div>
+                        <label class="col-sm-1 control-label">작업요약</label>
+                        <div class="col-sm-5"><textarea class="form-control" rows="2" id="ycomp" style="background-color:Yellow"></textarea></div>
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">작업수행자</label>
+                        <div class="col-sm-5"><textarea class="form-control" rows="2" id="ywho" style="background-color:Yellow"></textarea></div>
+                        <label class="col-sm-1 control-label">작업결과</label>
+                        <div class="col-sm-5"><textarea class="form-control" rows="2" id="yresult" style="background-color:Yellow"></textarea></div>
+                    </div>
+                    <hr>
+
+
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">작업번호</label>
+                        <div class="col-sm-5"><input class="form-control" id="yid" type="text" value="" disabled></div>
+                        <label class="col-sm-1 control-label">작업일시</label>
+                        <div class="col-sm-5"><input class="form-control" id="ytime" type="text" value="" disabled></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">작업명</label>
+                        <div class="col-sm-5"><input class="form-control" id="ytitleorg" type="text" value=""></div>
+                        <label class="col-sm-1 control-label">작업사유</label>
+                        <div class="col-sm-5"><input class="form-control" id="yreasonorg" type="text" value=""></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">작업상세내용1</label>
+                        <div class="col-sm-5"><textarea class="form-control" rows="6" id="ydetail1org"></textarea></div>
+                        <label class="col-sm-1 control-label">작업상세내용2</label>
+                        <div class="col-sm-5"><textarea class="form-control" rows="6" id="ydetail2org"></textarea></div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer" style="background-color:SlateBlue;">
+                <input class = "btn btn-primary" type="button" id="ysavechg" data-dismiss="modal" value="수정값으로 저장하기">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close(취소)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Server Error -->
+    <div class="modal fade" id="yModalsvrerror" role="dialog">
+        <div class="modal-dialog"  style="width:1000px;">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Server Error 추정</h4>
+            </div>
+            <div class="modal-body">
+                <div class="col-lg-12">
+                    <div class="jumbotron jumbotron-fluid">
+                        <div class="container">
+                            <h1>Server Error 추정됩니다!!!</h1>
+                            <h3>Tango 작업조회 수집시각이 20분 경과되었습니다.</h3>
+                        </div>
+                    </div>
+
+                    <div class="container">
+                        <button type="button" class="btn btn-danger">서버에서 10분단위 TANGO 작업조회 수집(Python)에 문제가 있는것으로 추정됩니다.</button>
+                        <br/>
+                        <hr/>
+                        <br/>
+                        <button type="button" class="btn btn-primary">연락주세요!!!  중부SO팀 양철승P 010-9315-0871</button>
+                        <br/>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Comma-->
+    <div class="modal fade" id="yModalComma" role="dialog">
+        <div class="modal-dialog"  style="width:1000px;height:1000px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Comma 본부방 공유</h4>
+                </div>
+            </div>
+            <div class="modal-body"  style="width:1000px;background-color:LightGoldenRodYellow;">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-12 control-label">Comma 본부방 공유</label>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-12"><textarea class="form-control" rows="20" id="ycomma" style="background-color:PaleGreen"></textarea></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="background-color:Gold;">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close(취소)</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
